@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Engineer Prompt Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-indigo-200 min-h-screen font-sans">
+    <div class="container mx-auto p-6 max-w-7xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-indigo-800 mb-2">Software Engineer Prompt Generator</h1>
+            <p class="text-indigo-600">Create prompts for your development tasks based on best industry practices.</p>
+        </header>
+        <div class="flex space-x-6">
+            <!-- Main Panel -->
+            <div class="w-2/3">
+                <div class="bg-white rounded-lg shadow-lg p-8 space-y-8">
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Task Type:</label>
+                        <div class="flex space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio text-indigo-600" name="task" value="debug" checked>
+                                <span class="ml-2">Debug</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio text-indigo-600" name="task" value="generate-ideas">
+                                <span class="ml-2">Generate Ideas</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio text-indigo-600" name="task" value="optimize">
+                                <span class="ml-2">Optimize</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="dynamic-fields"></div>
+                    <div id="toggle-options" class="space-y-2"></div>
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Output Format:</label>
+                        <div class="flex flex-col space-y-2">
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio text-indigo-600" name="output-format" value="bullet-points" checked>
+                                <span class="ml-2">Bullet Points</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio text-indigo-600" name="output-format" value="paragraph">
+                                <span class="ml-2">Paragraph</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" class="form-radio text-indigo-600" name="output-format" value="other">
+                                <span class="ml-2">Other</span>
+                            </label>
+                            <input type="text" id="custom-format" class="mt-2 p-2 w-full border rounded-md hidden" placeholder="Specify custom format">
+                        </div>
+                    </div>
+                    <button id="generate-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150 ease-in-out mt-6">Generate Prompt</button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Generated Prompt and AI Links -->
+            <div class="w-1/3 space-y-6">
+                <!-- Generated Prompt Section -->
+                <div id="result" class="bg-white rounded-lg shadow-lg p-6 hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-indigo-800">Generated Prompt:</h2>
+                        <button id="copy-btn" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                            Copy
+                        </button>
+                    </div>
+                    <p id="generated-prompt" class="text-gray-700 bg-indigo-50 p-4 rounded-md border border-indigo-100 whitespace-pre-wrap text-sm max-h-96 overflow-y-auto"></p>
+                </div>
+
+                <!-- AI Links Section -->
+                <div class="bg-white rounded-lg shadow-lg p-6 space-y-4">
+                    <h2 class="text-xl font-semibold text-indigo-800 mb-4">Quick AI Links</h2>
+                    <a href="https://claude.ai/new" target="_blank" class="block w-full bg-purple-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out text-center">
+                        Open Claude AI
+                    </a>
+                    <a href="https://chat.openai.com" target="_blank" class="block w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out text-center">
+                        Open ChatGPT
+                    </a>
+                    <a href="https://www.perplexity.ai" target="_blank" class="block w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out text-center">
+                        Open Perplexity AI
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
