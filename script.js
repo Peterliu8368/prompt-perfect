@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const elements = {
+        panelsContainer: document.getElementById('panels-container'),
+        mainPanel: document.getElementById('main-panel'),
+        rightPanel: document.getElementById('right-panel'),
         dynamicFields: document.getElementById('dynamic-fields'),
         toggleOptions: document.getElementById('toggle-options'),
         taskRadios: document.querySelectorAll('input[name="task"]'),
@@ -8,45 +11,26 @@ document.addEventListener('DOMContentLoaded', function() {
         generateBtn: document.getElementById('generate-btn'),
         result: document.getElementById('result'),
         generatedPrompt: document.getElementById('generated-prompt'),
-        copyBtn: document.getElementById('copy-btn')
+        copyBtn: document.getElementById('copy-btn'),
+        closeBtn: document.getElementById('close-btn')
     };
 
-    const createHtmlElement = (tagName, attributes = {}, content = '') => {
-        const element = document.createElement(tagName);
-        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
-        element.innerHTML = content;
-        return element.outerHTML;
-    };
-
-    const createField = (id, label, type = 'text', placeholder = '', isOptional = false) => {
-        const labelText = `${label}${isOptional ? ' (optional)' : ''}:`;
-        const inputAttributes = {
-            id,
-            class: 'w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500',
-            placeholder,
-            ...(type !== 'textarea' ? { type } : { rows: '4' })
-        };
-
+    const createField = (id, label, type = 'text', placeholder = '', isOptional = false, extraAttributes = '') => {
         return `
             <div class="input-group mb-4">
-                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${labelText}</label>
-                ${createHtmlElement(type === 'textarea' ? 'textarea' : 'input', inputAttributes)}
+                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">
+                    ${label}${isOptional ? ' (optional)' : ''}:
+                </label>
+                <${type === 'textarea' ? 'textarea' : 'input'} id="${id}" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" ${type !== 'textarea' ? `type="${type}"` : ''} placeholder="${placeholder}" ${type === 'textarea' ? 'rows="4"' : ''} ${extraAttributes}></${type === 'textarea' ? 'textarea' : 'input'}>
             </div>
         `;
     };
 
     const createToggle = (id, label, isChecked = false, recommendation = '') => {
-        const toggleAttributes = {
-            type: 'checkbox',
-            class: 'form-checkbox text-indigo-600',
-            id,
-            ...(isChecked ? { checked: '' } : {})
-        };
-
         return `
             <div class="mb-2">
                 <label class="inline-flex items-center cursor-pointer">
-                    ${createHtmlElement('input', toggleAttributes)}
+                    <input type="checkbox" class="form-checkbox text-indigo-600" id="${id}" ${isChecked ? 'checked' : ''}>
                     <span class="ml-2">${label}</span>
                     ${recommendation ? `<span class="ml-2 text-sm text-gray-500">(${recommendation})</span>` : ''}
                 </label>
@@ -80,22 +64,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 { id: 'code-snippet', label: 'Code Snippet', type: 'textarea', placeholder: 'Paste the code you want to optimize' }
             ],
             toggles: []
+        },
+        learn: {
+            fields: [
+                { id: 'topic', label: 'Topic', type: 'text', placeholder: 'Enter the topic you want to learn' },
+                { id: 'detail-level', label: 'Level of Detail', type: 'range', extraAttributes: 'min="1" max="5" value="3"' },
+            ],
+            toggles: [
+                { id: 'provide-examples', label: 'Provide Examples', isChecked: true },
+                { id: 'explain-like-im-3', label: 'Explain Like I\'m 3', isChecked: false }
+            ]
         }
     };
 
     const updateDynamicFields = (taskType) => {
         const config = taskConfigs[taskType];
-        const fieldsHTML = config.fields.map(field => createField(field.id, field.label, field.type, field.placeholder, field.isOptional)).join('');
+        const fieldsHTML = config.fields.map(field => createField(field.id, field.label, field.type, field.placeholder, field.isOptional, field.extraAttributes)).join('');
         const togglesHTML = [...config.toggles, { id: 'self-assessment', label: 'Enable AI Self-Assessment' }]
             .map(toggle => createToggle(toggle.id, toggle.label, toggle.isChecked, toggle.recommendation))
             .join('');
 
         elements.dynamicFields.innerHTML = fieldsHTML;
         elements.toggleOptions.innerHTML = togglesHTML;
+
+        // Add label for detail level slider if it exists
+        const detailLevelSlider = document.getElementById('detail-level');
+        if (detailLevelSlider) {
+            const sliderLabel = document.createElement('div');
+            sliderLabel.className = 'text-sm text-gray-600 mt-1';
+            sliderLabel.textContent = `Detail Level: ${detailLevelSlider.value}`;
+            detailLevelSlider.parentNode.appendChild(sliderLabel);
+
+            detailLevelSlider.addEventListener('input', (e) => {
+                sliderLabel.textContent = `Detail Level: ${e.target.value}`;
+            });
+        }
     };
 
     const generatePrompt = (data) => {
-        const { task, outputFormat, customFormat, stepByStep, selfAssessment, provideCodeSnippet, ...fields } = data;
+        const { task, outputFormat, customFormat, stepByStep, selfAssessment, provideCodeSnippet, provideExamples, explainLikeIm3, ...fields } = data;
         let prompt = "You are an expert software engineer with extensive experience in modern technologies and best practices. ";
         
         if (task === 'generate-ideas' && fields['tech-stack']) {
@@ -131,6 +138,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 "2. Suggest specific changes to optimize the code",
                 "3. Explain the reasoning behind your optimization suggestions",
                 "4. Provide any relevant best practices or additional tips for optimization"
+            ],
+            learn: [
+                `Please explain the topic "${fields.topic}" with the following considerations:`,
+                `1. Provide an explanation at a detail level of ${fields['detail-level']} out of 5`,
+                ...(provideExamples ? ["2. Include relevant examples to illustrate key concepts"] : []),
+                ...(explainLikeIm3 ? ["3. Explain the concept as if you were explaining it to a 3-year-old child"] : ["3. Use appropriate technical language for a software engineer"]),
+                "4. Cover the fundamental principles and their practical applications in software engineering",
+                "5. Highlight any best practices or common pitfalls related to this topic"
             ]
         };
 
@@ -158,6 +173,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const stepByStep = document.getElementById('step-by-step')?.checked ?? false;
         const selfAssessment = document.getElementById('self-assessment').checked;
         const provideCodeSnippet = document.getElementById('provide-code-snippet')?.checked ?? false;
+        const provideExamples = document.getElementById('provide-examples')?.checked ?? false;
+        const explainLikeIm3 = document.getElementById('explain-like-im-3')?.checked ?? false;
         const fields = Array.from(elements.dynamicFields.querySelectorAll('input, textarea'))
             .reduce((acc, field) => ({ ...acc, [field.id]: field.value }), {});
         
@@ -165,9 +182,22 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.generateBtn.disabled = true;
 
         setTimeout(() => {
-            const generatedPrompt = generatePrompt({ task, outputFormat, customFormat, stepByStep, selfAssessment, provideCodeSnippet, ...fields });
+            const generatedPrompt = generatePrompt({ 
+                task, 
+                outputFormat, 
+                customFormat, 
+                stepByStep, 
+                selfAssessment, 
+                provideCodeSnippet,
+                provideExamples,
+                explainLikeIm3,
+                ...fields 
+            });
             elements.generatedPrompt.textContent = generatedPrompt;
-            elements.result.classList.remove('hidden');
+            elements.rightPanel.classList.remove('hidden');
+            elements.mainPanel.classList.remove('mx-auto');
+            elements.mainPanel.classList.add('w-2/3');
+            elements.rightPanel.classList.add('w-1/3');
 
             elements.generateBtn.textContent = 'Generate Prompt';
             elements.generateBtn.disabled = false;
@@ -187,6 +217,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     };
 
+    const handleCloseClick = () => {
+        elements.rightPanel.classList.add('hidden');
+        elements.mainPanel.classList.add('mx-auto');
+        elements.mainPanel.classList.remove('w-2/3');
+    };
+
     // Event Listeners
     elements.taskRadios.forEach(radio => {
         radio.addEventListener('change', (e) => updateDynamicFields(e.target.value));
@@ -200,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     elements.generateBtn.addEventListener('click', handleGenerateClick);
     elements.copyBtn.addEventListener('click', handleCopyClick);
+    elements.closeBtn.addEventListener('click', handleCloseClick);
 
     // Initialize with default task (debug)
     updateDynamicFields('debug');
