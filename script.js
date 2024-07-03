@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const createField = (id, label, type = 'text', placeholder = '', isOptional = false, extraAttributes = '') => {
         return `
             <div class="input-group mb-4">
-                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-2">
                     ${label}${isOptional ? ' (optional)' : ''}:
                 </label>
                 <${type === 'textarea' ? 'textarea' : 'input'} id="${id}" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" ${type !== 'textarea' ? `type="${type}"` : ''} placeholder="${placeholder}" ${type === 'textarea' ? 'rows="4"' : ''} ${extraAttributes}></${type === 'textarea' ? 'textarea' : 'input'}>
