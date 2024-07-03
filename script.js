@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dynamicFields: document.getElementById('dynamic-fields'),
         toggleOptions: document.getElementById('toggle-options'),
         taskRadios: document.querySelectorAll('input[name="task"]'),
+        container: document.querySelector('.container'),
         outputFormatRadios: document.querySelectorAll('input[name="output-format"]'),
         customFormatInput: document.getElementById('custom-format'),
         generateBtn: document.getElementById('generate-btn'),
@@ -38,16 +39,21 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     };
 
+    const createSlider = (id, label) => {
+        return `
+            <div class="mb-4">
+                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${label}:</label>
+                <input type="range" id="${id}" min="1" max="3" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                <div class="flex justify-between text-xs text-gray-600 mt-1">
+                    <span>Least Detailed</span>
+                    <span>Normal</span>
+                    <span>Most Detailed</span>
+                </div>
+            </div>
+        `;
+    };
+
     const taskConfigs = {
-        debug: {
-            fields: [
-                { id: 'error-message', label: 'Error Message', type: 'textarea', placeholder: 'Describe the error you\'re encountering' },
-                { id: 'code-snippet', label: 'Code Snippet', type: 'textarea', placeholder: 'Paste your code here', isOptional: true }
-            ],
-            toggles: [
-                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'recommended only for very complex tasks' }
-            ]
-        },
         'generate-ideas': {
             fields: [
                 { id: 'tech-stack', label: 'Tech Stack' },
@@ -68,41 +74,42 @@ document.addEventListener('DOMContentLoaded', function() {
         learn: {
             fields: [
                 { id: 'topic', label: 'Topic', type: 'text', placeholder: 'Enter the topic you want to learn' },
-                { id: 'detail-level', label: 'Level of Detail', type: 'range', extraAttributes: 'min="1" max="5" value="3"' },
             ],
+            slider: { id: 'detail-level', label: 'Level of Detail' },
             toggles: [
                 { id: 'provide-examples', label: 'Provide Examples', isChecked: true },
                 { id: 'explain-like-im-3', label: 'Explain Like I\'m 3', isChecked: false }
+            ]
+        },
+        debug: {
+            fields: [
+                { id: 'error-message', label: 'Error Message', type: 'textarea', placeholder: 'Describe the error you\'re encountering' },
+                { id: 'code-snippet', label: 'Code Snippet', type: 'textarea', placeholder: 'Paste your code here', isOptional: true }
+            ],
+            toggles: [
+                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'recommended only for very complex tasks' }
             ]
         }
     };
 
     const updateDynamicFields = (taskType) => {
         const config = taskConfigs[taskType];
-        const fieldsHTML = config.fields.map(field => createField(field.id, field.label, field.type, field.placeholder, field.isOptional, field.extraAttributes)).join('');
+        let fieldsHTML = config.fields.map(field => createField(field.id, field.label, field.type, field.placeholder, field.isOptional, field.extraAttributes)).join('');
+        
+        if (config.slider) {
+            fieldsHTML += createSlider(config.slider.id, config.slider.label);
+        }
+        
         const togglesHTML = [...config.toggles, { id: 'self-assessment', label: 'Enable AI Self-Assessment' }]
             .map(toggle => createToggle(toggle.id, toggle.label, toggle.isChecked, toggle.recommendation))
             .join('');
 
         elements.dynamicFields.innerHTML = fieldsHTML;
         elements.toggleOptions.innerHTML = togglesHTML;
-
-        // Add label for detail level slider if it exists
-        const detailLevelSlider = document.getElementById('detail-level');
-        if (detailLevelSlider) {
-            const sliderLabel = document.createElement('div');
-            sliderLabel.className = 'text-sm text-gray-600 mt-1';
-            sliderLabel.textContent = `Detail Level: ${detailLevelSlider.value}`;
-            detailLevelSlider.parentNode.appendChild(sliderLabel);
-
-            detailLevelSlider.addEventListener('input', (e) => {
-                sliderLabel.textContent = `Detail Level: ${e.target.value}`;
-            });
-        }
     };
 
     const generatePrompt = (data) => {
-        const { task, outputFormat, customFormat, stepByStep, selfAssessment, provideCodeSnippet, provideExamples, explainLikeIm3, ...fields } = data;
+        const { task, outputFormat, customFormat, stepByStep, selfAssessment, provideCodeSnippet, provideExamples, explainLikeIm3, detailLevel, ...fields } = data;
         let prompt = "You are an expert software engineer with extensive experience in modern technologies and best practices. ";
         
         if (task === 'generate-ideas' && fields['tech-stack']) {
@@ -141,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ],
             learn: [
                 `Please explain the topic "${fields.topic}" with the following considerations:`,
-                `1. Provide an explanation at a detail level of ${fields['detail-level']} out of 5`,
+                `1. Provide an explanation at a ${detailLevel === '1' ? 'basic' : detailLevel === '2' ? 'intermediate' : 'advanced'} level of detail`,
                 ...(provideExamples ? ["2. Include relevant examples to illustrate key concepts"] : []),
                 ...(explainLikeIm3 ? ["3. Explain the concept as if you were explaining it to a 3-year-old child"] : ["3. Use appropriate technical language for a software engineer"]),
                 "4. Cover the fundamental principles and their practical applications in software engineering",
@@ -166,6 +173,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return prompt;
     };
 
+    const adjustLayout = () => {
+        if (elements.rightPanel.classList.contains('hidden')) {
+            elements.mainPanel.classList.remove('w-2/3');
+            elements.mainPanel.classList.add('w-full', 'max-w-3xl', 'mx-auto');
+            elements.container.classList.remove('max-w-7xl');
+            elements.container.classList.add('max-w-3xl');
+        } else {
+            elements.mainPanel.classList.remove('w-full', 'max-w-3xl', 'mx-auto');
+            elements.mainPanel.classList.add('w-2/3');
+            elements.container.classList.remove('max-w-3xl');
+            elements.container.classList.add('max-w-7xl');
+        }
+    };
+
     const handleGenerateClick = () => {
         const task = document.querySelector('input[name="task"]:checked').value;
         const outputFormat = document.querySelector('input[name="output-format"]:checked').value;
@@ -175,7 +196,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const provideCodeSnippet = document.getElementById('provide-code-snippet')?.checked ?? false;
         const provideExamples = document.getElementById('provide-examples')?.checked ?? false;
         const explainLikeIm3 = document.getElementById('explain-like-im-3')?.checked ?? false;
-        const fields = Array.from(elements.dynamicFields.querySelectorAll('input, textarea'))
+        const detailLevel = document.getElementById('detail-level')?.value ?? '2';
+        const fields = Array.from(elements.dynamicFields.querySelectorAll('input[type="text"], textarea'))
             .reduce((acc, field) => ({ ...acc, [field.id]: field.value }), {});
         
         elements.generateBtn.textContent = 'Generating...';
@@ -191,14 +213,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 provideCodeSnippet,
                 provideExamples,
                 explainLikeIm3,
+                detailLevel,
                 ...fields 
             });
             elements.generatedPrompt.textContent = generatedPrompt;
             elements.rightPanel.classList.remove('hidden');
-            elements.mainPanel.classList.remove('mx-auto');
-            elements.mainPanel.classList.add('w-2/3');
-            elements.rightPanel.classList.add('w-1/3');
-
+            adjustLayout();
+    
             elements.generateBtn.textContent = 'Generate Prompt';
             elements.generateBtn.disabled = false;
         }, 1000);
@@ -219,8 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const handleCloseClick = () => {
         elements.rightPanel.classList.add('hidden');
-        elements.mainPanel.classList.add('mx-auto');
-        elements.mainPanel.classList.remove('w-2/3');
+        adjustLayout();
     };
 
     // Event Listeners
@@ -238,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
     elements.copyBtn.addEventListener('click', handleCopyClick);
     elements.closeBtn.addEventListener('click', handleCloseClick);
 
-    // Initialize with default task (debug)
-    updateDynamicFields('debug');
+    // Initialize with default task (generate-ideas)
+    updateDynamicFields('generate-ideas');
+    adjustLayout();
 });
