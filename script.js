@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ],
             toggles: [
                 { id: 'provide-code-snippet', label: 'Provide Code Snippet', isChecked: true },
-                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'recommended only for very complex tasks' }
+                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'may produce better results' }
             ]
         },
         optimize: {
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { id: 'code-snippet', label: 'Code Snippet', type: 'textarea', placeholder: 'Paste your code here', isOptional: true }
             ],
             toggles: [
-                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'recommended only for very complex tasks' }
+                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'may produce better results' }
             ]
         }
     };
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fieldsHTML += createSlider(config.slider.id, config.slider.label);
         }
         
-        const togglesHTML = [...config.toggles, { id: 'self-assessment', label: 'Enable AI Self-Assessment' }]
+        const togglesHTML = [...config.toggles, { id: 'self-assessment', label: 'Enable AI Self-Assessment', recommendation: 'may produce better results' }]
             .map(toggle => createToggle(toggle.id, toggle.label, toggle.isChecked, toggle.recommendation))
             .join('');
 
