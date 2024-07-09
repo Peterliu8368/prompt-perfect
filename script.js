@@ -142,12 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             prompt += "Please provide detailed, professional advice for the following task:\n\n";
     
-            const taskDescriptions = {
-                'generate-ideas': "Generate innovative ideas and approaches",
-                'optimize': "Optimize the given code",
-                'debug': "Debug and resolve issues in the provided code"
-            };
-    
             Object.entries(fields).forEach(([key, value]) => {
                 if (value) {
                     const formattedKey = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
