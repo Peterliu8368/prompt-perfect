@@ -72,7 +72,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ],
             toggles: [
                 { id: 'provide-code-snippet', label: 'Provide Code Snippet', isChecked: true },
-                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'may produce better results' }
+                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'may produce better results' },
+                { id: 'self-assessment', label: 'AI Self-Assessment', isChecked: false }
             ]
         },
         optimize: {
@@ -87,7 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { id: 'code-snippet', label: 'Code Snippet', type: 'textarea', placeholder: 'Paste your code here', isOptional: true }
             ],
             toggles: [
-                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'may produce better results' }
+                { id: 'step-by-step', label: 'Enable Step-by-Step Thinking', isChecked: false, recommendation: 'may produce better results' },
+                { id: 'self-assessment', label: 'AI Self-Assessment', isChecked: false }
             ]
         }
     };
@@ -180,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
             prompt += "\n\nPlease provide a detailed response with explanations, code examples where appropriate, and any additional insights that would be valuable for a software engineer working on this task.";
     
-            if (selfAssessment) {
+            if (selfAssessment && (task === 'generate-ideas' || task === 'debug')) {
                 prompt += "\n\nAfter providing your response, please include a brief self-assessment. Rate your confidence in your answers on a scale of 1-10 and identify any potential limitations or areas where you're less certain. If applicable, mention any assumptions you made or additional information that would have been helpful to have.";
             }
     
@@ -209,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const outputFormat = task !== 'general' ? document.querySelector('input[name="output-format"]:checked').value : null;
         const customFormat = task !== 'general' ? elements.customFormatInput.value : null;
         const stepByStep = document.getElementById('step-by-step')?.checked ?? false;
-        const selfAssessment = task !== 'general' ? document.getElementById('self-assessment')?.checked ?? false : false;
+        const selfAssessment = (task === 'generate-ideas' || task === 'debug') ? document.getElementById('self-assessment')?.checked ?? false : false;
         const provideCodeSnippet = document.getElementById('provide-code-snippet')?.checked ?? false;
         const provideExamples = document.getElementById('provide-examples')?.checked ?? false;
         const explainLikeIm3 = document.getElementById('explain-like-im-3')?.checked ?? false;
