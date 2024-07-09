@@ -42,7 +42,6 @@
   
   .custom-radio {
     display: inline-flex;
-    align-items: center;
     cursor: pointer;
     margin-right: 16px;
   }
@@ -96,7 +95,6 @@
     line-height: 1;
     display: flex;
     align-items: center;
-    padding-block-start: 1px;
   }
   
   /* Specific styles for task type radio buttons */
