@@ -19,23 +19,27 @@
             <div id="main-panel" class="w-2/3">
                 <div class="bg-white rounded-lg shadow-lg p-8 space-y-8">
                     <div class="input-group">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Task Type:</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Task Type:</label>
                         <div class="flex space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-indigo-600" name="task" value="general" checked>
-                                <span class="ml-2">General</span>
+                            <label class="custom-radio">
+                                <input type="radio" class="form-radio" name="task" value="general" checked>
+                                <span class="radio-button"></span>
+                                <span class="radio-label">General</span>
                             </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-indigo-600" name="task" value="generate-ideas">
-                                <span class="ml-2">Generate Ideas</span>
+                            <label class="custom-radio">
+                                <input type="radio" class="form-radio" name="task" value="generate-ideas">
+                                <span class="radio-button"></span>
+                                <span class="radio-label">Generate Ideas</span>
                             </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-indigo-600" name="task" value="optimize">
-                                <span class="ml-2">Optimize</span>
+                            <label class="custom-radio">
+                                <input type="radio" class="form-radio" name="task" value="optimize">
+                                <span class="radio-button"></span>
+                                <span class="radio-label">Optimize</span>
                             </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-indigo-600" name="task" value="debug">
-                                <span class="ml-2">Debug</span>
+                            <label class="custom-radio">
+                                <input type="radio" class="form-radio" name="task" value="debug">
+                                <span class="radio-button"></span>
+                                <span class="radio-label">Debug</span>
                             </label>
                         </div>
                     </div>
@@ -46,19 +50,22 @@
                         <!-- Toggles will be dynamically inserted here -->
                     </div>
                     <div class="input-group">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Output Format:</label>
-                        <div class="flex flex-col space-y-2">
-                            <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-indigo-600" name="output-format" value="bullet-points" checked>
-                                <span class="ml-2">Bullet Points</span>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Output Format:</label>
+                        <div class="flex flex-col space-y-2 output-format-radios">
+                            <label class="custom-radio">
+                                <input type="radio" class="form-radio" name="output-format" value="bullet-points" checked>
+                                <span class="radio-button"></span>
+                                <span class="radio-label">Bullet Points</span>
                             </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-indigo-600" name="output-format" value="paragraph">
-                                <span class="ml-2">Paragraph</span>
+                            <label class="custom-radio">
+                                <input type="radio" class="form-radio" name="output-format" value="paragraph">
+                                <span class="radio-button"></span>
+                                <span class="radio-label">Paragraph</span>
                             </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-indigo-600" name="output-format" value="other">
-                                <span class="ml-2">Other</span>
+                            <label class="custom-radio">
+                                <input type="radio" class="form-radio" name="output-format" value="other">
+                                <span class="radio-button"></span>
+                                <span class="radio-label">Other</span>
                             </label>
                             <input type="text" id="custom-format" class="mt-2 p-2 w-full border rounded-md hidden" placeholder="Specify custom format">
                         </div>

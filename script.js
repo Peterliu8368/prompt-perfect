@@ -19,30 +19,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const createField = (id, label, type = 'text', placeholder = '', isOptional = false, extraAttributes = '') => {
         return `
             <div class="input-group mb-4">
-                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="${id}" class="block text-sm font-semibold text-gray-700 mb-2">
                     ${label}${isOptional ? ' (optional)' : ''}:
                 </label>
                 <${type === 'textarea' ? 'textarea' : 'input'} id="${id}" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" ${type !== 'textarea' ? `type="${type}"` : ''} placeholder="${placeholder}" ${type === 'textarea' ? 'rows="4"' : ''} ${extraAttributes}></${type === 'textarea' ? 'textarea' : 'input'}>
             </div>
         `;
     };
-
+    
     const createToggle = (id, label, isChecked = false, recommendation = '') => {
         return `
             <div class="flex items-center py-2">
                 <input type="checkbox" id="${id}" class="toggle-switch" ${isChecked ? 'checked' : ''}>
-                <label for="${id}" class="ml-2 text-sm font-medium text-gray-900">
+                <label for="${id}" class="ml-2 text-sm font-semibold text-gray-900">
                     ${label}
                     ${recommendation ? ` <span class="text-xs text-gray-500">(${recommendation})</span>` : ''}
                 </label>
             </div>
         `;
     };
-
+    
     const createSlider = (id, label) => {
         return `
             <div class="mb-4">
-                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${label}:</label>
+                <label for="${id}" class="block text-sm font-semibold text-gray-700 mb-1">${label}:</label>
                 <input type="range" id="${id}" min="1" max="3" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
                 <div class="flex justify-between text-xs text-gray-600 mt-1">
                     <span>Least Detailed</span>

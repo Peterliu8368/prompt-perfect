@@ -39,3 +39,89 @@
   .toggle-switch:checked::before {
     transform: translateX(16px);
   }
+
+  .custom-radio {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    margin-right: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .custom-radio input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+  
+  .radio-button {
+    position: relative;
+    height: 14px;
+    width: 14px;
+    background-color: #fff;
+    border: 1.5px solid #4f46e5;
+    border-radius: 50%;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  
+  .custom-radio:hover input ~ .radio-button {
+    background-color: #ede9fe;
+  }
+  
+  .custom-radio input:checked ~ .radio-button {
+    background-color: #4f46e5;
+  }
+  
+  .radio-button:after {
+    content: "";
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+  }
+  
+  .custom-radio input:checked ~ .radio-button:after {
+    display: block;
+  }
+  
+  .radio-label {
+    font-size: 16px;
+    color: #1f2937;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Specific styles for task type radio buttons */
+  .task-type-radios .custom-radio {
+    margin-bottom: 0;
+  }
+  
+  /* Specific styles for output format radio buttons */
+  .output-format-radios .custom-radio {
+    margin-right: 0;
+    width: 100%;
+  }
+  
+  .output-format-radios {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px; /* Adjust this value to increase/decrease spacing */
+  }
+  
+  .output-format-radios .custom-radio {
+    margin: 0; /* Remove any existing margins */
+    width: 100%;
+  }
+  
+  /* Style for the custom format input */
+  #custom-format {
+    margin-top: 5px; /* Match the gap of the grid */
+  }
