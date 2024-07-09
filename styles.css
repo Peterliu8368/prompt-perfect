@@ -9,3 +9,33 @@
         @apply p-2;
     }
 }
+.toggle-switch {
+    appearance: none;
+    width: 36px;
+    height: 20px;
+    background-color: #e5e7eb;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .toggle-switch::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    background-color: white;
+    transition: transform 0.3s;
+  }
+  
+  .toggle-switch:checked {
+    background-color: #10b981;
+  }
+  
+  .toggle-switch:checked::before {
+    transform: translateX(16px);
+  }

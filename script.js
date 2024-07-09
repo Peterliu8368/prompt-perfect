@@ -29,11 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const createToggle = (id, label, isChecked = false, recommendation = '') => {
         return `
-            <div class="mb-2">
-                <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="form-checkbox text-indigo-600" id="${id}" ${isChecked ? 'checked' : ''}>
-                    <span class="ml-2">${label}</span>
-                    ${recommendation ? `<span class="ml-2 text-sm text-gray-500">(${recommendation})</span>` : ''}
+            <div class="flex items-center py-2">
+                <input type="checkbox" id="${id}" class="toggle-switch" ${isChecked ? 'checked' : ''}>
+                <label for="${id}" class="ml-2 text-sm font-medium text-gray-900">
+                    ${label}
+                    ${recommendation ? ` <span class="text-xs text-gray-500">(${recommendation})</span>` : ''}
                 </label>
             </div>
         `;
