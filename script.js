@@ -54,11 +54,21 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     const taskConfigs = {
+        general: {
+            fields: [
+                { id: 'vanilla-prompt', label: 'Your Prompt', type: 'textarea', placeholder: 'Enter your prompt here' },
+            ],
+            slider: { id: 'detail-level', label: 'Level of Detail' },
+            toggles: [
+                { id: 'provide-examples', label: 'Provide Examples', isChecked: true },
+                { id: 'explain-like-im-3', label: 'Explain Like I\'m 3', isChecked: false }
+            ]
+        },
         'generate-ideas': {
             fields: [
-                { id: 'tech-stack', label: 'Tech Stack' },
-                { id: 'issues', label: 'Issues', type: 'textarea', placeholder: 'Describe the problem or feature you need ideas for' },
-                { id: 'expected-behavior', label: 'Expected Behavior (requirements)', type: 'textarea', placeholder: 'Describe what you want to achieve' }
+                { id: 'context', label: 'Context', type: 'textarea', placeholder: 'Provide any relevant background information or context' },
+                { id: 'central-idea', label: 'What are you looking to accomplish', type: 'textarea', placeholder: 'Describe the central idea or goal you need help with' },
+                { id: 'constraints', label: 'Constraints', type: 'textarea', placeholder: 'Describe any limitations or specific requirements that need to be considered' }
             ],
             toggles: [
                 { id: 'provide-code-snippet', label: 'Provide Code Snippet', isChecked: true },
@@ -70,16 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 { id: 'code-snippet', label: 'Code Snippet', type: 'textarea', placeholder: 'Paste the code you want to optimize' }
             ],
             toggles: []
-        },
-        learn: {
-            fields: [
-                { id: 'topic', label: 'Topic', type: 'text', placeholder: 'Enter the topic you want to learn' },
-            ],
-            slider: { id: 'detail-level', label: 'Level of Detail' },
-            toggles: [
-                { id: 'provide-examples', label: 'Provide Examples', isChecked: true },
-                { id: 'explain-like-im-3', label: 'Explain Like I\'m 3', isChecked: false }
-            ]
         },
         debug: {
             fields: [
@@ -100,76 +100,93 @@ document.addEventListener('DOMContentLoaded', function() {
             fieldsHTML += createSlider(config.slider.id, config.slider.label);
         }
         
-        const togglesHTML = [...config.toggles, { id: 'self-assessment', label: 'Enable AI Self-Assessment', recommendation: 'may produce better results' }]
+        const togglesHTML = config.toggles
             .map(toggle => createToggle(toggle.id, toggle.label, toggle.isChecked, toggle.recommendation))
             .join('');
-
+    
         elements.dynamicFields.innerHTML = fieldsHTML;
         elements.toggleOptions.innerHTML = togglesHTML;
+    
+        // Hide or show output format based on task type
+        const outputFormatSection = document.querySelector('.input-group:has(input[name="output-format"])');
+        if (outputFormatSection) {
+            outputFormatSection.style.display = taskType === 'general' ? 'none' : 'block';
+        }
     };
 
     const generatePrompt = (data) => {
         const { task, outputFormat, customFormat, stepByStep, selfAssessment, provideCodeSnippet, provideExamples, explainLikeIm3, detailLevel, ...fields } = data;
         let prompt = "You are an expert software engineer with extensive experience in modern technologies and best practices. ";
-        
-        if (task === 'generate-ideas' && fields['tech-stack']) {
-            prompt += `You are also an expert in ${fields['tech-stack']} with deep knowledge of its best practices and latest features. `;
+    
+        if (task === 'general') {
+            prompt += "As an industry expert, please respond to the following prompt:\n\n";
+            prompt += `${fields['vanilla-prompt']}\n\n`;
+            prompt += "When responding, please adhere to the following guidelines:\n";
+            prompt += "1. Provide your response in a concise and structured manner.\n";
+            prompt += "2. Incorporate relevant industry best practices and standards.\n";
+            prompt += "3. Use clear headings and subheadings to organize your response.\n";
+            prompt += "4. Include practical examples or code snippets where appropriate.\n";
+            prompt += "5. Address potential challenges or considerations related to the topic.\n";
+            prompt += `6. Tailor your explanation to a ${detailLevel === '1' ? 'basic' : detailLevel === '2' ? 'intermediate' : 'advanced'} level of detail.\n`;
+            
+            if (provideExamples) {
+                prompt += "7. Provide relevant real-world examples to illustrate key points.\n";
+            }
+            
+            if (explainLikeIm3) {
+                prompt += "8. Explain complex concepts in simple terms, as if explaining to a beginner.\n";
+            } else {
+                prompt += "8. Use appropriate technical language for a software engineering audience.\n";
+            }
+        } else {
+            prompt += "Please provide detailed, professional advice for the following task:\n\n";
+            prompt += `Task: ${task}\n\n`;
+    
+            Object.entries(fields).forEach(([key, value]) => {
+                if (value) prompt += `${key.replace('-', ' ').toUpperCase()}:\n${value}\n\n`;
+            });
+    
+            const taskPrompts = {
+                'generate-ideas': [
+                    "Based on the context and information provided, please:",
+                    "1. Provide creative ideas and approaches to accomplish this goal or implement this central idea",
+                    "2. Explain how each approach addresses or works within the given constraints",
+                    "3. Explain the pros and cons of each approach",
+                    "4. Suggest the most suitable solution and explain why",
+                    "5. Provide any relevant best practices or considerations for implementation",
+                    ...(provideCodeSnippet ? ["6. For each idea or approach, provide a code snippet that demonstrates the core concept or implementation"] : [])
+                ],
+                optimize: [
+                    "Based on the code provided, please:",
+                    "1. Identify areas for optimization in terms of performance, readability, and maintainability",
+                    "2. Suggest specific changes to optimize the code",
+                    "3. Explain the reasoning behind your optimization suggestions",
+                    "4. Provide any relevant best practices or additional tips for optimization"
+                ],
+                debug: [
+                    "Based on the information provided, please:",
+                    "1. Identify potential issues in the code",
+                    "2. Suggest solutions to resolve these issues",
+                    "3. Explain the reasoning behind your suggestions",
+                    "4. Provide any relevant best practices or optimization tips"
+                ]
+            };
+    
+            prompt += taskPrompts[task].join('\n');
+    
+            if (stepByStep && (task === 'debug' || task === 'generate-ideas')) {
+                prompt += "\n\nPlease provide a step-by-step explanation of your thought process, clearly outlining each stage of your reasoning. This will help understand the logic behind your suggestions and how you arrived at your conclusions.";
+            }
+    
+            prompt += "\n\nPlease provide a detailed response with explanations, code examples where appropriate, and any additional insights that would be valuable for a software engineer working on this task.";
+    
+            if (selfAssessment) {
+                prompt += "\n\nAfter providing your response, please include a brief self-assessment. Rate your confidence in your answers on a scale of 1-10 and identify any potential limitations or areas where you're less certain. If applicable, mention any assumptions you made or additional information that would have been helpful to have.";
+            }
+    
+            prompt += `\n\nPlease format your response as ${outputFormat === 'other' ? customFormat : outputFormat}.`;
         }
-        
-        prompt += "Please provide detailed, professional advice for the following task:\n\n";
-        prompt += `Task: ${task}\n\n`;
-
-        Object.entries(fields).forEach(([key, value]) => {
-            if (value) prompt += `${key.replace('-', ' ').toUpperCase()}:\n${value}\n\n`;
-        });
-
-        const taskPrompts = {
-            debug: [
-                "Based on the information provided, please:",
-                "1. Identify potential issues in the code",
-                "2. Suggest solutions to resolve these issues",
-                "3. Explain the reasoning behind your suggestions",
-                "4. Provide any relevant best practices or optimization tips"
-            ],
-            'generate-ideas': [
-                "Based on the information provided, please:",
-                "1. Provide creative ideas and approaches to implement this feature or solve this problem",
-                "2. Explain the pros and cons of each approach",
-                "3. Suggest the most suitable solution and explain why",
-                "4. Provide any relevant best practices or considerations for implementation",
-                ...(provideCodeSnippet ? ["5. For each idea or approach, provide a code snippet that demonstrates the core concept or implementation"] : [])
-            ],
-            optimize: [
-                "Based on the code provided, please:",
-                "1. Identify areas for optimization in terms of performance, readability, and maintainability",
-                "2. Suggest specific changes to optimize the code",
-                "3. Explain the reasoning behind your optimization suggestions",
-                "4. Provide any relevant best practices or additional tips for optimization"
-            ],
-            learn: [
-                `Please explain the topic "${fields.topic}" with the following considerations:`,
-                `1. Provide an explanation at a ${detailLevel === '1' ? 'basic' : detailLevel === '2' ? 'intermediate' : 'advanced'} level of detail`,
-                ...(provideExamples ? ["2. Include relevant examples to illustrate key concepts"] : []),
-                ...(explainLikeIm3 ? ["3. Explain the concept as if you were explaining it to a 3-year-old child"] : ["3. Use appropriate technical language for a software engineer"]),
-                "4. Cover the fundamental principles and their practical applications in software engineering",
-                "5. Highlight any best practices or common pitfalls related to this topic"
-            ]
-        };
-
-        prompt += taskPrompts[task].join('\n');
-
-        if (stepByStep && (task === 'debug' || task === 'generate-ideas')) {
-            prompt += "\n\nPlease provide a step-by-step explanation of your thought process, clearly outlining each stage of your reasoning. This will help understand the logic behind your suggestions and how you arrived at your conclusions.";
-        }
-
-        prompt += "\n\nPlease provide a detailed response with explanations, code examples where appropriate, and any additional insights that would be valuable for a software engineer working on this task.";
-
-        if (selfAssessment) {
-            prompt += "\n\nAfter providing your response, please include a brief self-assessment. Rate your confidence in your answers on a scale of 1-10 and identify any potential limitations or areas where you're less certain. If applicable, mention any assumptions you made or additional information that would have been helpful to have.";
-        }
-
-        prompt += `\n\nPlease format your response as ${outputFormat === 'other' ? customFormat : outputFormat}.`;
-
+    
         return prompt;
     };
 
@@ -189,16 +206,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const handleGenerateClick = () => {
         const task = document.querySelector('input[name="task"]:checked').value;
-        const outputFormat = document.querySelector('input[name="output-format"]:checked').value;
-        const customFormat = elements.customFormatInput.value;
+        const outputFormat = task !== 'general' ? document.querySelector('input[name="output-format"]:checked').value : null;
+        const customFormat = task !== 'general' ? elements.customFormatInput.value : null;
         const stepByStep = document.getElementById('step-by-step')?.checked ?? false;
-        const selfAssessment = document.getElementById('self-assessment').checked;
+        const selfAssessment = task !== 'general' ? document.getElementById('self-assessment')?.checked ?? false : false;
         const provideCodeSnippet = document.getElementById('provide-code-snippet')?.checked ?? false;
         const provideExamples = document.getElementById('provide-examples')?.checked ?? false;
         const explainLikeIm3 = document.getElementById('explain-like-im-3')?.checked ?? false;
         const detailLevel = document.getElementById('detail-level')?.value ?? '2';
         const fields = Array.from(elements.dynamicFields.querySelectorAll('input[type="text"], textarea'))
-            .reduce((acc, field) => ({ ...acc, [field.id]: field.value }), {});
+        .reduce((acc, field) => ({ ...acc, [field.id]: field.value }), {});
         
         elements.generateBtn.textContent = 'Generating...';
         elements.generateBtn.disabled = true;
@@ -225,13 +242,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     };
 
-    const handleCopyClick = () => {
-        navigator.clipboard.writeText(elements.generatedPrompt.textContent)
+    const copyToClipboard = (text) => {
+        return navigator.clipboard.writeText(text);
+    };
+    
+    const openAIService = (url) => {
+        window.open(url, '_blank');
+    };
+    
+    const handleCopyAndOpen = (aiService) => {
+        const promptText = elements.generatedPrompt.textContent;
+        copyToClipboard(promptText)
             .then(() => {
-                elements.copyBtn.textContent = 'Copied!';
-                setTimeout(() => {
-                    elements.copyBtn.textContent = 'Copy';
-                }, 2000);
+                switch(aiService) {
+                    case 'perplexity':
+                        openAIService('https://www.perplexity.ai');
+                        break;
+                    case 'claude':
+                        openAIService('https://claude.ai');
+                        break;
+                    case 'chatgpt':
+                        openAIService('https://chat.openai.com');
+                        break;
+                }
             })
             .catch(err => {
                 console.error('Failed to copy text: ', err);
@@ -240,6 +273,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const handleCloseClick = () => {
         elements.rightPanel.classList.add('hidden');
+        adjustLayout();
+    };
+
+    const initializeApp = () => {
+        updateDynamicFields('general');
         adjustLayout();
     };
 
@@ -255,10 +293,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     elements.generateBtn.addEventListener('click', handleGenerateClick);
-    elements.copyBtn.addEventListener('click', handleCopyClick);
+    document.getElementById('copy-open-perplexity').addEventListener('click', () => handleCopyAndOpen('perplexity'));
+    document.getElementById('copy-open-claude').addEventListener('click', () => handleCopyAndOpen('claude'));
+    document.getElementById('copy-open-chatgpt').addEventListener('click', () => handleCopyAndOpen('chatgpt'));
+
     elements.closeBtn.addEventListener('click', handleCloseClick);
 
-    // Initialize with default task (generate-ideas)
-    updateDynamicFields('generate-ideas');
-    adjustLayout();
+    initializeApp();
 });
