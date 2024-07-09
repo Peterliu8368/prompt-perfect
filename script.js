@@ -307,6 +307,5 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('copy-open-chatgpt').addEventListener('click', () => handleCopyAndOpen('chatgpt'));
 
     elements.closeBtn.addEventListener('click', handleCloseClick);
-
     initializeApp();
 });
