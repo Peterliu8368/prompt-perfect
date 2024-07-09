@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'generate-ideas': {
             fields: [
                 { id: 'context', label: 'Context', type: 'textarea', placeholder: 'Provide any relevant background information or context' },
-                { id: 'central-idea', label: 'What are you looking to accomplish', type: 'textarea', placeholder: 'Describe the central idea or goal you need help with' },
+                { id: 'task-to-accomplish', label: 'Task to be Accomplished', type: 'textarea', placeholder: 'Describe the task you need help with' },
                 { id: 'constraints', label: 'Constraints', type: 'textarea', placeholder: 'Describe any limitations or specific requirements that need to be considered' }
             ],
             toggles: [
@@ -121,15 +121,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let prompt = "You are an expert software engineer with extensive experience in modern technologies and best practices. ";
     
         if (task === 'general') {
-            prompt += "As an industry expert, please respond to the following prompt:\n\n";
-            prompt += `${fields['vanilla-prompt']}\n\n`;
+            prompt += `As an industry expert, please respond to the following prompt:\n\n${fields['vanilla-prompt']}\n\n`;
             prompt += "When responding, please adhere to the following guidelines:\n";
             prompt += "1. Provide your response in a concise and structured manner.\n";
             prompt += "2. Incorporate relevant industry best practices and standards.\n";
             prompt += "3. Use clear headings and subheadings to organize your response.\n";
             prompt += "4. Include practical examples or code snippets where appropriate.\n";
             prompt += "5. Address potential challenges or considerations related to the topic.\n";
-            prompt += `6. Tailor your explanation to a ${detailLevel === '1' ? 'basic' : detailLevel === '2' ? 'intermediate' : 'advanced'} level of detail.\n`;
+            prompt += `6. Tailor your explanation to a ${['basic', 'intermediate', 'advanced'][detailLevel - 1]} level of detail.\n`;
             
             if (provideExamples) {
                 prompt += "7. Provide relevant real-world examples to illustrate key points.\n";
@@ -142,51 +141,65 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             prompt += "Please provide detailed, professional advice for the following task:\n\n";
-            prompt += `Task: ${task}\n\n`;
+    
+            const taskDescriptions = {
+                'generate-ideas': "Generate innovative ideas and approaches",
+                'optimize': "Optimize the given code",
+                'debug': "Debug and resolve issues in the provided code"
+            };
     
             Object.entries(fields).forEach(([key, value]) => {
-                if (value) prompt += `${key.replace('-', ' ').toUpperCase()}:\n${value}\n\n`;
+                if (value) {
+                    const formattedKey = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    prompt += `${formattedKey}:\n${value}\n\n`;
+                }
             });
     
             const taskPrompts = {
                 'generate-ideas': [
-                    "Based on the context and information provided, please:",
-                    "1. Provide creative ideas and approaches to accomplish this goal or implement this central idea",
-                    "2. Explain how each approach addresses or works within the given constraints",
-                    "3. Explain the pros and cons of each approach",
-                    "4. Suggest the most suitable solution and explain why",
-                    "5. Provide any relevant best practices or considerations for implementation",
-                    ...(provideCodeSnippet ? ["6. For each idea or approach, provide a code snippet that demonstrates the core concept or implementation"] : [])
+                    "Based on the provided context and requirements, please:",
+                    "1. Generate creative and innovative ideas to accomplish the given task",
+                    "2. For each idea, explain how it aligns with the given constraints and requirements",
+                    "3. Provide a detailed analysis of the pros and cons for each approach",
+                    "4. Recommend the most suitable solution, justifying your choice",
+                    "5. Outline key considerations and best practices for implementing the chosen solution",
+                    ...(provideCodeSnippet ? ["6. Provide a concise code snippet or pseudocode to illustrate the core concept of each idea"] : [])
                 ],
-                optimize: [
-                    "Based on the code provided, please:",
-                    "1. Identify areas for optimization in terms of performance, readability, and maintainability",
-                    "2. Suggest specific changes to optimize the code",
-                    "3. Explain the reasoning behind your optimization suggestions",
-                    "4. Provide any relevant best practices or additional tips for optimization"
+                'optimize': [
+                    "After analyzing the provided code, please:",
+                    "1. Identify specific areas for optimization in terms of performance, readability, and maintainability",
+                    "2. Suggest concrete changes to improve the code, explaining the rationale behind each optimization",
+                    "3. Highlight any potential trade-offs or considerations for each optimization",
+                    "4. Provide refactored code snippets to demonstrate the suggested improvements",
+                    "5. Offer additional tips and best practices for ongoing code optimization"
                 ],
-                debug: [
-                    "Based on the information provided, please:",
-                    "1. Identify potential issues in the code",
-                    "2. Suggest solutions to resolve these issues",
-                    "3. Explain the reasoning behind your suggestions",
-                    "4. Provide any relevant best practices or optimization tips"
+                'debug': [
+                    "Based on the error message and code provided, please:",
+                    "1. Analyze the code and identify potential causes of the reported issue",
+                    "2. Propose specific solutions to resolve the bug, explaining the reasoning behind each suggestion",
+                    "3. Provide corrected code snippets or pseudocode to illustrate the fixes",
+                    "4. Suggest any additional improvements or optimizations that could prevent similar issues in the future",
+                    "5. Offer debugging tips and best practices relevant to this specific problem"
                 ]
             };
     
             prompt += taskPrompts[task].join('\n');
     
-            if (stepByStep && (task === 'debug' || task === 'generate-ideas')) {
-                prompt += "\n\nPlease provide a step-by-step explanation of your thought process, clearly outlining each stage of your reasoning. This will help understand the logic behind your suggestions and how you arrived at your conclusions.";
+            if (stepByStep) {
+                prompt += "\n\nIn your response, please provide a step-by-step breakdown of your thought process, clearly outlining each stage of your reasoning. This will help understand the logic behind your suggestions and how you arrived at your conclusions.";
             }
     
-            prompt += "\n\nPlease provide a detailed response with explanations, code examples where appropriate, and any additional insights that would be valuable for a software engineer working on this task.";
-    
-            if (selfAssessment && (task === 'generate-ideas' || task === 'debug')) {
-                prompt += "\n\nAfter providing your response, please include a brief self-assessment. Rate your confidence in your answers on a scale of 1-10 and identify any potential limitations or areas where you're less certain. If applicable, mention any assumptions you made or additional information that would have been helpful to have.";
+            if (selfAssessment) {
+                prompt += "\n\nAfter providing your response, please include a brief self-assessment. Rate your confidence in your answers on a scale of 1-10, identify any potential limitations or areas of uncertainty, and mention any assumptions made or additional information that would have been helpful.";
             }
     
-            prompt += `\n\nPlease format your response as ${outputFormat === 'other' ? customFormat : outputFormat}.`;
+            const formatInstructions = {
+                'bullet-points': "bullet points",
+                'paragraph': "coherent paragraphs",
+                'other': customFormat || "a clear and organized structure"
+            };
+    
+            prompt += `\n\nPlease format your response as ${formatInstructions[outputFormat]}.`;
         }
     
         return prompt;
