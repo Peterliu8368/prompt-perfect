@@ -42,12 +42,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const createSlider = (id, label) => {
         return `
             <div class="mb-4">
-                <label for="${id}" class="block text-sm font-semibold text-gray-700 mb-1">${label}:</label>
-                <input type="range" id="${id}" min="1" max="3" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                <div class="flex justify-between text-xs text-gray-600 mt-1">
-                    <span>Least Detailed</span>
-                    <span>Normal</span>
-                    <span>Most Detailed</span>
+                <label for="${id}" class="block text-sm font-semibold text-gray-700 mb-2">${label}:</label>
+                <input type="range" id="${id}" class="custom-slider" min="1" max="3" value="2">
+                <div class="slider-labels">
+                    <span class="slider-label">Least Detailed</span>
+                    <span class="slider-label">Normal</span>
+                    <span class="slider-label">Most Detailed</span>
                 </div>
             </div>
         `;

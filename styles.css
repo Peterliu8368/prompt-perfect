@@ -39,13 +39,12 @@
   .toggle-switch:checked::before {
     transform: translateX(16px);
   }
-
+  
   .custom-radio {
     display: inline-flex;
     align-items: center;
     cursor: pointer;
     margin-right: 16px;
-    margin-bottom: 8px;
   }
   
   .custom-radio input {
@@ -61,9 +60,12 @@
     background-color: #fff;
     border: 1.5px solid #4f46e5;
     border-radius: 50%;
-    margin-right: 8px;
+    margin-right: 3px;
     transition: all 0.3s ease;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .custom-radio:hover input ~ .radio-button {
@@ -78,9 +80,6 @@
     content: "";
     position: absolute;
     display: none;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -97,6 +96,7 @@
     line-height: 1;
     display: flex;
     align-items: center;
+    padding-block-start: 1px;
   }
   
   /* Specific styles for task type radio buttons */
@@ -125,3 +125,56 @@
   #custom-format {
     margin-top: 5px; /* Match the gap of the grid */
   }
+
+  .custom-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: #e5e7eb;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+}
+
+.custom-slider:hover {
+    opacity: 1;
+}
+
+.custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4f46e5;
+    cursor: pointer;
+    transition: all .2s ease-in-out;
+}
+
+.custom-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4f46e5;
+    cursor: pointer;
+    transition: all .2s ease-in-out;
+    border: none;
+}
+
+.custom-slider::-webkit-slider-thumb:hover,
+.custom-slider::-moz-range-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.1);
+    transform: scale(1.1);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.slider-label {
+    font-size: 12px;
+    color: #6b7280;
+}
