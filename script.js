@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         'generate-ideas': {
             fields: [
+                { id: 'tech-stack', label: 'Tech Stack' },
                 { id: 'context', label: 'Context', type: 'textarea', placeholder: 'Provide any relevant background information or context' },
                 { id: 'task-to-accomplish', label: 'Task to be Accomplished', type: 'textarea', placeholder: 'Describe the task you need help with' },
                 { id: 'constraints', label: 'Constraints', type: 'textarea', placeholder: 'Describe any limitations or specific requirements that need to be considered' }
@@ -118,7 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const generatePrompt = (data) => {
         const { task, outputFormat, customFormat, stepByStep, selfAssessment, provideCodeSnippet, provideExamples, explainLikeIm3, detailLevel, ...fields } = data;
-        let prompt = "You are an expert software engineer with extensive experience in modern technologies and best practices. ";
+        let prompt = "You are an expert software engineer with extensive experience in modern technologies and best practices. \n";
+        if (task === 'generate-ideas' && fields['tech-stack']) {
+            prompt += `You are also an expert in ${fields['tech-stack']} with deep knowledge of its best practices and latest features. \n`;
+        }
     
         if (task === 'general') {
             prompt += `As an industry expert, please respond to the following prompt:\n\n${fields['vanilla-prompt']}\n\n`;
