@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             prompt += "Please provide detailed, professional advice for the following task:\n\n";
+            prompt += `Task: ${task}\n\n`;
     
             Object.entries(fields).forEach(([key, value]) => {
                 if (value) {
