@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
         result: document.getElementById('result'),
         generatedPrompt: document.getElementById('generated-prompt'),
         copyBtn: document.getElementById('copy-btn'),
-        closeBtn: document.getElementById('close-btn')
+        closeBtn: document.getElementById('close-btn'),
+        resetBtn: document.getElementById('reset-btn')
     };
 
     const createField = (id, label, type = 'text', placeholder = '', isOptional = false, extraAttributes = '') => {
@@ -29,9 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const createToggle = (id, label, isChecked = false, recommendation = '') => {
         return `
-            <div class="flex items-center py-2">
+            <div class="flex py-2 flex-col">
+            <div class="toggle-wrapper">
                 <input type="checkbox" id="${id}" class="toggle-switch" ${isChecked ? 'checked' : ''}>
                 <label for="${id}" class="ml-2 text-sm font-semibold text-gray-900">
+                <label for="${id}" class="toggle-label">
                     ${label}
                     ${recommendation ? ` <span class="text-xs text-gray-500">(${recommendation})</span>` : ''}
                 </label>
@@ -264,6 +267,48 @@ document.addEventListener('DOMContentLoaded', function() {
         window.open(url, '_blank');
     };
     
+    const handleResetClick = () => {
+        // Get the current task type
+        const currentTaskType = document.querySelector('input[name="task"]:checked').value;
+        
+        // Clear all input fields for the current task type
+        elements.dynamicFields.querySelectorAll('input[type="text"], textarea').forEach(input => {
+            input.value = '';
+        });
+        
+        // Reset all toggles for the current task type
+        elements.toggleOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Reset detail level slider if it exists (for 'general' task type)
+        if (currentTaskType === 'general') {
+            const detailLevelSlider = document.getElementById('detail-level');
+            if (detailLevelSlider) {
+                detailLevelSlider.value = 2;
+            }
+        }
+        
+        // Reset output format radios if they exist (for non-general task types)
+        if (currentTaskType !== 'general') {
+            const defaultOutputFormat = document.querySelector('input[name="output-format"][value="markdown"]');
+            if (defaultOutputFormat) {
+                defaultOutputFormat.checked = true;
+            }
+            if (elements.customFormatInput) {
+                elements.customFormatInput.style.display = 'none';
+                elements.customFormatInput.value = '';
+            }
+        }
+        
+        // Hide the right panel if it's visible
+        elements.rightPanel.classList.add('hidden');
+        adjustLayout();
+        
+        // Reset to initial dynamic fields for the current task type
+        updateDynamicFields(currentTaskType);
+    };
+
     const handleCopyAndOpen = (aiService) => {
         const promptText = elements.generatedPrompt.textContent;
         copyToClipboard(promptText)
@@ -292,6 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const initializeApp = () => {
         updateDynamicFields('general');
+        elements.resetBtn.addEventListener('click', handleResetClick);
         adjustLayout();
     };
 
